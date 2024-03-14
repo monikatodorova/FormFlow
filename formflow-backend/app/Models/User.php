@@ -2,44 +2,84 @@
 
 namespace App\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
+use App\Models\Subscriptions\Package;
+use App\Models\Subscriptions\Payment;
+
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
-use Laravel\Sanctum\HasApiTokens;
+use Laravel\Passport\HasApiTokens;
 
 class User extends Authenticatable
 {
     use HasApiTokens, HasFactory, Notifiable;
 
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var array<int, string>
-     */
-    protected $fillable = [
-        'name',
-        'email',
-        'password',
-    ];
+    // Config
+    protected $fillable = ['name', 'email', 'password', 'package_id', 'default_project_id'];
+    protected $hidden = ['password',];
+    protected $appends = ['avatar'];
 
-    /**
-     * The attributes that should be hidden for serialization.
-     *
-     * @var array<int, string>
-     */
-    protected $hidden = [
-        'password',
-        'remember_token',
-    ];
+    // Relations
+    public function projects() {
+        return $this->hasMany(Project::class);
+    }
 
-    /**
-     * The attributes that should be cast.
-     *
-     * @var array<string, string>
-     */
-    protected $casts = [
-        'email_verified_at' => 'datetime',
-        'password' => 'hashed',
-    ];
+    public function defaultProject() {
+        return $this->belongsTo(Project::class, 'default_project_id');
+    }
+
+    public function tags() {
+        return $this->hasMany(Tag::class);
+    }
+
+    public function package() {
+        return $this->belongsTo(Package::class);
+    }
+
+    public function payments() {
+        return $this->hasMany(Payment::class);
+    }
+
+    // Methods
+    public function getId() {
+        return $this->id;
+    }
+
+    public function getName() {
+        return $this->name;
+    }
+
+    public function getEmail() {
+        return $this->email;
+    }
+
+    public function getAvatarAttribute() {
+        return [
+            'credentials' => $this->shortName(),
+            'color' => $this->color()->color,
+            'text' => $this->color()->text,
+        ];
+    }
+
+    public function shortName() {
+        $name = $this->name;
+        $nameItems = explode(" ", $name);
+        $returnable = "";
+        foreach($nameItems as $nameItem) {
+            $returnable .= mb_substr($nameItem, 0, 1);
+        }
+        $returnable = mb_strtoupper($returnable, 'UTF-8');
+        return mb_substr($returnable, 0, 2);
+    }
+
+    public function color() {
+        $email = $this->email;
+        $colors = Color::query()->orderBy('color')->get()->makeHidden(['id', 'name']);
+        $hash = 0;
+        for($i = 0; $i < strlen($email); $i++) {
+            $hash = $hash + ord($email[$i]);
+        }
+        $index = abs($hash % count($colors));
+        return $colors[$index];
+    }
 }

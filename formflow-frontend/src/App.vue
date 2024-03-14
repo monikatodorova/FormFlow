@@ -1,30 +1,151 @@
 <template>
-  <nav>
-    <router-link to="/">Home</router-link> |
-    <router-link to="/about">About</router-link>
-  </nav>
-  <router-view />
+  <div id="app">
+
+    <!-- Body -->
+    <div :class="{'page-global-wrapper': true, 'signed-out': !signedIn}">
+
+      <div class="page-global-sidebar">
+        <!-- Header -->
+        <Navigation v-if="signedIn"></Navigation>
+      </div>
+
+      <div class="page-global-content">
+        <router-view/>
+      </div>
+
+    </div>
+
+    <vue3-confirm-dialog></vue3-confirm-dialog>
+    
+  </div>
 </template>
 
+<script>
+import Navigation from "@/components/navigation/Navigation.vue"
+
+export default {
+  components: {Navigation},
+  data: function() {
+    return {
+      modal: null,
+    }
+  },
+  computed: {
+    signedIn() {
+      return this.$store.getters.token !== null;
+    }
+  },
+  created: function() {
+  }
+}
+</script>
+
 <style lang="scss">
-#app {
-  font-family: Avenir, Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-align: center;
-  color: #2c3e50;
+@import 'node_modules/bootstrap/scss/bootstrap';
+@import "src/scss/variables";
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+html, body {
+	background-color: $white;
+	font-family: 'Inter', sans-serif;
+	font-size: 14px;
+
+	@include smartphone {
+		background: $white;
+	}
 }
 
-nav {
-  padding: 30px;
+body {
+	@include smartphone {
+		padding-bottom: 54px;
+	}
+}
 
-  a {
-    font-weight: bold;
-    color: #2c3e50;
+.container-fluid {
+	padding-left: 15px !important;
+	padding-right: 15px !important;
 
-    &.router-link-exact-active {
-      color: #42b983;
+	@include small-desktop {
+		& {
+			padding-left: 15px !important;
+			padding-right: 15px !important;
+		}
+	}
+
+	@include tablet {
+		& {
+			padding-left: 15px !important;
+			padding-right: 15px !important;
+		}
+	}
+
+	@include smartphone {
+		& {
+			padding-left: 15px !important;
+			padding-right: 15px !important;
+		}
+	}
+}
+
+.page-global-wrapper {
+    display: flex;
+    min-height: 100svh;
+
+    @include tablet {
+        display: block;
     }
-  }
+
+    @include smartphone {
+        display: block;
+    }
+
+    .page-global-sidebar {
+        background: $white;
+        width: 22rem;
+        height: 100svh;
+        display: flex;
+        flex-grow: 0;
+        flex-shrink: 0;
+        position: sticky;
+        top: 0;
+        border-right: 1px solid $border-grey;
+
+        @include tablet {
+            width: 100%;
+            height: auto;
+            position: relative;
+            z-index: 1;
+        }
+
+        @include smartphone {
+            width: 100%;
+            height: auto;
+            position: relative;
+            z-index: 1;
+        }
+    }
+
+    .page-global-content {
+        flex-grow: 1;
+        width: calc(100% - 22rem);
+
+        @include tablet {
+            position: relative;
+            z-index: 0;
+            width: 100%;
+        }
+
+        @include smartphone {
+            position: relative;
+            z-index: 0;
+            width: 100%;
+        }
+    }
+
+    &.signed-out {
+        .page-global-sidebar {
+            display: none;
+        }
+    }
 }
 </style>

@@ -39,9 +39,9 @@ class Kernel extends HttpKernel
         ],
 
         'api' => [
-            // \Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful::class,
             \Illuminate\Routing\Middleware\ThrottleRequests::class.':api',
             \Illuminate\Routing\Middleware\SubstituteBindings::class,
+            \Illuminate\Http\Middleware\HandleCors::class,
         ],
     ];
 
@@ -64,5 +64,9 @@ class Kernel extends HttpKernel
         'signed' => \App\Http\Middleware\ValidateSignature::class,
         'throttle' => \Illuminate\Routing\Middleware\ThrottleRequests::class,
         'verified' => \Illuminate\Auth\Middleware\EnsureEmailIsVerified::class,
+        'ownership.project' => \App\Http\Middleware\ConfirmProjectOwnership::class,
+        'ownership.form' => \App\Http\Middleware\ConfirmFormOwnership::class,
+        'relationship.project-form' => \App\Http\Middleware\ConfirmProjectFormRelationship::class,
+        'cors' => \Illuminate\Http\Middleware\HandleCors::class,
     ];
 }
