@@ -1,27 +1,31 @@
 <template>
     <div class="form-wrapper">
-        <h1>Edit Project</h1>
+        <div class="row">
+            <div class="col-md-5">
+                <h1>Edit Project</h1>
 
-        <div class="alert alert-danger p-0" v-if="error">{{ error }}</div>
+                <div class="alert alert-danger p-0" v-if="error">{{ error }}</div>
 
-        <form action="#" @submit.prevent="submitForm" method="post" class="form-wrapper">
-            <p>Please enter details</p>
-            <div class="form-group">
-                <label>Project Name</label>
-                <input type="text" class="form-control" name="name" v-model="name" required>
+                <form action="#" @submit.prevent="submitForm" method="post" class="form-wrapper">
+                    <p>To make updates, modify the project details below.</p>
+                    <div class="form-group">
+                        <label>Project Name</label>
+                        <input type="text" class="form-control" name="name" v-model="name" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Project Website</label>
+                        <input type="text" class="form-control" name="website" v-model="website" required>
+                    </div>
+                    <button type="submit"
+                            v-bind:class="{'btn': true, 'btn-primary btn-lg mt-3':true, 'disabled': this.saving}"
+                            @click="$event.target.blur()">
+                        <span class="spinner-border" v-show="this.saving"></span>
+                        <span :class="{'opacity-0': this.saving}">Save changes</span>
+                    </button>
+                    <div class="alert alert-danger mt-4" v-show="this.error">{{ this.error }}</div>
+                </form>
             </div>
-            <div class="form-group">
-                <label>Project Website</label>
-                <input type="text" class="form-control" name="website" v-model="website" required>
-            </div>
-            <button type="submit"
-                    v-bind:class="{'btn': true, 'btn-primary btn-lg mt-3':true, 'disabled': this.saving}"
-                    @click="$event.target.blur()">
-                <span class="spinner-border" v-show="this.saving"></span>
-                <span :class="{'opacity-0': this.saving}">Save changes</span>
-            </button>
-            <div class="alert alert-danger mt-4" v-show="this.error">{{ this.error }}</div>
-    </form>
+        </div>
     </div>
 </template>
 

@@ -5,10 +5,11 @@
     <div :class="{'page-global-wrapper': true, 'signed-out': !signedIn}">
 
       <div class="page-global-sidebar">
-        <!-- Header -->
+        <!-- Navidation -->
         <Navigation v-if="signedIn"></Navigation>
       </div>
 
+      <!-- Main Part -->
       <div class="page-global-content">
         <router-view/>
       </div>
@@ -21,10 +22,15 @@
 </template>
 
 <script>
+import { useMainStore } from '@/store';
 import Navigation from "@/components/navigation/Navigation.vue"
 
 export default {
   components: {Navigation},
+  setup() {
+    const store = useMainStore();
+    return { store }
+  },
   data: function() {
     return {
       modal: null,
@@ -32,11 +38,9 @@ export default {
   },
   computed: {
     signedIn() {
-      return this.$store.getters.token !== null;
+      return this.store.getToken !== null;
     }
   },
-  created: function() {
-  }
 }
 </script>
 

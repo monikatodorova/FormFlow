@@ -76,6 +76,7 @@ export default {
 		},
 		totalProjectForms() {
 			if (!this.loaded) return 0;
+			console.log(this.project);
 			return this.project.forms_count;
 		},
 		totalProjectSubmissions() {

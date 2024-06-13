@@ -24,7 +24,7 @@ class Submission extends Model
     // Config
     protected $fillable = ['name', 'email', 'fields', 'status', 'form_id'];
     protected $hidden = ['id'];
-    protected $appends = ['hashId'];
+    protected $appends = ['hashId', 'avatar'];
 
     // Relations
     public function form() {

@@ -14,7 +14,7 @@ class Project extends Model
     use HasHashIdRouting;
 
     // Config
-    protected $fillable = ['name', 'website', 'category', 'user_id'];
+    protected $fillable = ['name', 'website', 'user_id'];
     protected $hidden = ['id', 'active', 'created_at', 'updated_at',];
     protected $appends = ['hashId'];
     public const PROJECT_CATEGORIES = [
@@ -53,6 +53,11 @@ class Project extends Model
 
     public function checkOwnership($user) {
         return $this->user->id == $user->id;
+    }
+
+    public function getRouteKeyName()
+    {
+        return 'hashId';
     }
 
 }

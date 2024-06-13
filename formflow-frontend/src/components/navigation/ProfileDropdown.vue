@@ -1,6 +1,7 @@
 <template>
     <div :class="{'profile-item': true, 'loading': !user.loaded}">
         <Dropdown v-if="user.loaded" class="profile-dropdown" position="bottom">
+
             <template v-slot:toggle>
                 <div class="profile-dropdown-toggle">
                     <div class="profile-link" v-if="user.avatar !== undefined">
@@ -12,6 +13,7 @@
                     </div>
                 </div>
             </template>
+
             <template v-slot:content>
                 <div class="d-flex d-lg-none">
                     <div class="profile-link" v-if="user.avatar !== undefined">
@@ -26,6 +28,7 @@
 				<router-link to="/projects" class="dropdown-link">Projects</router-link>
 				<router-link to="/logout" class="dropdown-link">Sign out</router-link>
             </template>
+
         </Dropdown>
 
         <div class="profile-link loading-link" v-if="!user.loaded">
@@ -35,16 +38,16 @@
 </template>
 
 <script>
+import { useMainStore } from '@/store';
 import repository from "@/repository/repository";
 import Dropdown from "@/components/widgets/Dropdown.vue";
 
 export default {
     name: "ProfileDropdown",
     components: {Dropdown},
-    data() {
-        return {
-
-        }
+    setup() {
+        const store = useMainStore();
+        return { store }
     },
     created() {
         this.loadUser();
@@ -53,12 +56,11 @@ export default {
         loadUser() {
             repository.get("/me")
                 .then(response => {
-                    console.log(response);
-                    this.$store.commit("updateUser", response.data.user);
+                    this.store.updateUser(response.data.user);
                 })
                 .catch(error => {
                     console.log(error);
-                    this.$store.commit("logoutUser");
+                    this.store.logoutUser();
                     if(this.$route.path !== "/login") {
                         this.$router.replace("/login");
                     }
@@ -67,11 +69,11 @@ export default {
     },
     computed: {
         user() {
-            return this.$store.getters.user;
+            return this.store.getUser;
         },
         userCredentials() {
             if(this.user.avatar == null) return "";
-            return this.user.avatar.userCredentials;
+            return this.user.avatar.credentials;
         },
         avatarBackground() {
             if (this.user.avatar == null) return null;

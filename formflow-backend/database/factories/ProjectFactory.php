@@ -28,7 +28,6 @@ class ProjectFactory extends Factory
             'user_id' => $this->faker->numberBetween(1, 10),
             'name' => $this->faker->company,
             'website' => $this->faker->domainName,
-            'category' => "Real Estate",
             'active' => $this->faker->boolean,
         ];
     }

@@ -2,12 +2,10 @@
     <div class="submissions-table-wrapper">
 
         <div class="row align-items-center mb-3" v-if="!loaded || (!showTitle && items.length > 0) || showTitle">
-			<div class="col-12 col-md-6">
-                <!-- Submissions Type -->
+			<div class="col-12 col-md-6 p-0" v-if="loaded">
                 <h4 class="mb-0">All Submissions</h4>
 			</div>
-            <div class="col-12 col-md-6">
-                <!-- Filters -->
+            <div class="col-12 col-md-6" v-if="loaded">
                 <div class="submissions-filter">
                     <span>Submissions per page</span>
                     <select v-model="perPage" class="form-control">
@@ -18,60 +16,67 @@
                     </select>
                 </div>
             </div>
-		</div>
+		
         
-        <!-- Submissions Table -->
-        <div :class="{'submissions-table': true, 'empty-table': meta.totalSubmissions < 10, 'loading': !loaded}" ref="submissionsTable">
+            <!-- Submissions Table -->
+            <div :class="{'submissions-table': true, 'empty-table': meta.totalSubmissions < 10, 'loading': !loaded}" ref="submissionsTable">
 
-        <table class="table">
-            <thead>
-            <tr>
-                <th>Submission</th>
-                <th scope="col" v-for="(field) in formFields" :key="field">{{ capitalizeFirstLetter(field) }}</th>
-                <th>Submitted On</th>
-            </tr>
-            </thead>
-            <tbody>
-            <tr v-if="!loaded" class="loading-tr">
-                <td>Loading effect entry</td>
-                <td>Loading effect</td>
-                <td>Loading</td>
-            </tr>
-            <tr v-if="!loaded" class="loading-tr">
-                <td>Loading effect entry</td>
-                <td>Loading effect</td>
-                <td>Loading</td>
-            </tr>
-            <tr v-for="(submission) in items" :key="submission.hashId" :class="{ 'new': submission.status !== 'seen' }">
-                <td>
-                    <router-link :to="'/submissions/' + submission.hashId" class="submission-name" :title="submission.name">
-                        <!-- <span :class="{'submission-avatar': true, 'text-light': submission.avatar.text === 'light', 'text-dark': submission.avatar.text === 'dark'}" :style="{backgroundColor: submission.avatar.color}">{{ submission.avatar.credentials }}</span> -->
-                        <strong>{{ submission.name }}</strong>
-                    </router-link>
-                </td>
-                <td v-for="(field) in formFields" :key="field" :title="submission.fields[field]">
-                    {{ submission.fields[field] }}
-                </td>
-                <td class="submission-date">
-                    {{ submission.created_at }}
-                </td>
-            </tr>
-            </tbody>
-        </table>
-        </div>
+                <table class="table">
 
-        <!-- Load more & total results -->
-        <div class="submissions-results d-flex align-items-center mt-4" v-if="loaded">
-            <div :class="{'load-more': true, 'd-none': meta.next === null}">
-                <span v-if="!meta.loading" class="toggler" @click.prevent="loadMore">Load more</span>
-                <span v-if="meta.loading" class="spinner-border"></span>
+                    <thead>
+                    <tr>
+                        <th>Submission</th>
+                        <th scope="col" v-for="(field) in formFields" :key="field">{{ capitalizeFirstLetter(field) }}</th>
+                        <th>Submitted On</th>
+                    </tr>
+                    </thead>
+
+                    <tbody>
+
+                    <tr v-if="!loaded" class="loading-tr">
+                        <td>Loading effect entry</td>
+                        <td>Loading effect</td>
+                        <td>Loading</td>
+                    </tr>
+                    <tr v-if="!loaded" class="loading-tr">
+                        <td>Loading effect entry</td>
+                        <td>Loading effect</td>
+                        <td>Loading</td>
+                    </tr>
+
+                    <tr v-for="(submission) in items" :key="submission.hashId" :class="{ 'new': submission.status !== 'seen' }">
+                        <td>
+                            <router-link :to="'/submissions/' + submission.hashId" class="submission-name" :title="submission.name" @click="updateSubmissionStatus(submission.hashId, 'seen')">
+                                <span :class="{'submission-avatar': true, 'text-light': submission.avatar.text === 'light', 'text-dark': submission.avatar.text === 'dark'}" :style="{backgroundColor: submission.avatar.color}">{{ submission.avatar.credentials }}</span>
+                                <strong>{{ submission.name }}</strong>
+                            </router-link>
+                        </td>
+                        <td v-for="(field) in formFields" :key="field" :title="submission.fields[field]">
+                            {{ submission.fields[field] }}
+                        </td>
+                        <td class="submission-date">
+                            {{ this.formattedDate(submission.created_at) }}
+                        </td>
+                    </tr>
+
+                    </tbody>
+
+                </table>
             </div>
-            <p class="small m-0">Showing {{ items.length }} out of {{ meta.totalSubmissions }} submissions</p>
+
+            <!-- Load more & total results -->
+            <div class="submissions-results d-flex align-items-center mt-4" v-if="loaded">
+                <div :class="{'load-more': true, 'd-none': meta.next === null}">
+                    <span v-if="!meta.loading" class="toggler" @click.prevent="loadMore">Load more</span>
+                    <span v-if="meta.loading" class="spinner-border"></span>
+                </div>
+                <p class="small m-0">Showing {{ items.length }} out of {{ meta.totalSubmissions }} submissions</p>
+            </div>
         </div>
 
 		<!-- No Submissions Found -->
-		<div class="submissions-no" v-if="loaded && items.length === 0 && showTitle">
-			<p>No submissions found.</p>
+		<div class="submissions-no" v-if="loaded && meta.totalSubmissions === 0">
+			<p><b>Connect your website form</b> to start receiving submissions for your project.<br>You currently do not have submissions for this form. </p>
 		</div>
 
     </div>
@@ -81,9 +86,18 @@
 import { useEventBus } from '@/EventBus'
 import repository from '@/repository/repository'
 
+import { useMainStore } from '@/store';
+import dayjs from 'dayjs';
+
 export default {
     name: "SubmissionsTable",
     props: ['formId', 'status'],
+    setup() {
+        const store = useMainStore();
+        return {
+            store
+        }
+    },
     data() {
         return {
             items: [],
@@ -139,6 +153,9 @@ export default {
         updateSubmissionStatus(id, status) {
 			this.items.filter(item => item.hashId === id)[0].status = status;
 		},
+        formattedDate(submitedOn) {
+            return dayjs(submitedOn).format('MMMM D, YYYY, h:mm A');
+        }
     },
     created() {
         this.loadFormSubmissions(this.status, this.perPage, true);
@@ -149,8 +166,7 @@ export default {
     },
     computed: {
         projectId() {
-            console.log(this.$store.getters.currentProject.hashId);
-            return this.$store.getters.currentProject.hashId;
+            return this.store.getCurrentProject.hashId;
         },
         formFields() {
             let fields = [];
@@ -198,11 +214,18 @@ export default {
 @import "src/scss/variables";
 
 .submissions-table-wrapper {
-	padding: 1.5rem;
+	padding: 0 1.5rem 0 1.5rem;
 
 	@include smartphone {
 		padding: 0.75rem;
 	}
+
+    h4 {
+        font-size: 1.25rem;
+        font-weight: 600;
+        color: $dark;
+        margin: 1rem 0;
+    }
 }
 
 .submissions-filter {
@@ -236,7 +259,7 @@ export default {
 	padding: 0 1.5rem;
     overflow-y: scroll;
     overflow-x: scroll;
-    height: calc(100svh - 11.7rem - 42px);
+    height: calc(100svh - 11.7rem - 65px);
 
     &.empty-table {
         height: auto;

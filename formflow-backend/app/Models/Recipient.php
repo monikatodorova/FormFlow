@@ -28,8 +28,4 @@ class Recipient extends Model
         return $this->email;
     }
 
-    public function unsubscribeLink() {
-        return config('app.landing') . '/unsubscribe/' . $this->hashId;
-    }
-
 }

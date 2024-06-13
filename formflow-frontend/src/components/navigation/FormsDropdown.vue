@@ -1,34 +1,44 @@
 <template>
     <div class="forms-dropdown">
-        <Dropdown v-if="forms.loaded" position="right" :class="{'nav-item project-item bottom-item': true, 'loading': !forms.loaded}">
+        <Dropdown :class="{'nav-item project-item bottom-item': true, 'loading': !forms.loaded}">
+
             <template v-slot:toggle>
                 <div class="nav-link">
                     <img src="@/assets/icons/forms.svg" alt="Forms">
                     <span>Forms</span>
                 </div>
             </template>
+
             <template v-slot:content>
                 <h4 class="dropdown-title">Your forms</h4>
-                <hr class="d-lg-none">
+                
                 <div class="spinner-border" v-if="!forms.loaded"></div>
+
                 <router-link :to="'/forms/' + item.hashId" v-for="(item, key) in forms.items" :key="key" class="form-details">
                     <div class="form-color-line" :style="{'backgroundColor': item.color.color}"></div>
                     <div class="form-name">{{ item.name }}</div>
                 </router-link>
+
                 <router-link to="/forms/new" class="btn btn-primary d-block w-100 mt-3 mb-2">Create new form</router-link>
             </template>
+
         </Dropdown>
     </div>
 </template>
 
 <script>
+import { useEventBus } from "@/EventBus";
+import { useMainStore } from '@/store';
 import repository from "@/repository/repository";
 import Dropdown from "@/components/widgets/Dropdown";
-import { useEventBus } from "@/EventBus";
 
 export default {
     name: "FormsDropdown",
     components: {Dropdown},
+    setup() {
+        const store = useMainStore();
+        return { store }
+    },
     created() {
         useEventBus().on('reloadForms', () => {
             this.loadForms();
@@ -36,10 +46,10 @@ export default {
     },
     computed: {
         forms() {
-            return this.$store.getters.forms;
+            return this.store.getForms;
         },
         currentProject() {
-            return this.$store.getters.currentProject;
+            return this.store.getCurrentProject;
         },
     },
     methods: {
@@ -47,7 +57,7 @@ export default {
             if (!this.currentProject.loaded) return;
             repository.get("/projects/" + this.currentProject.hashId + "/forms")
                 .then(response => {
-                    this.$store.commit("updateForms", response.data.forms);
+                    this.store.updateForms(response.data.forms);
                 })
                 .catch(error => {
                     console.log(error);
@@ -55,7 +65,7 @@ export default {
         },
     },
     watch: {
-        '$store.state.currentProject.hashId': function() {
+        'store.state.currentProject.hashId': function() {
             if(this.currentProject.loaded) this.loadForms();
         }
     },
@@ -69,7 +79,7 @@ export default {
 @import "src/scss/variables";
 
 .forms-dropdown {
-
+    
     .dropdown-title {
         font-weight: 600;
         color: $dark;

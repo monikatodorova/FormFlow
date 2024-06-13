@@ -2,19 +2,14 @@
 
 namespace App\Services;
 
-use App\Models\User;
 use App\Repositories\UsersRepository;
 use App\Repositories\ProjectsRepository;
 use Illuminate\Http\Response;
-use Illuminate\Support\Facades\Validator;
-use Illuminate\Validation\ValidationException;
-use Laravel\Passport\Bridge\UserRepository;
 
 class UsersService {
 
     /**
      * Tries to authenticate the user with the provided email and password.
-     * If successful, it will return a OAuth 2.0 Token.
      * @param $email
      * @param $password
      * @return Response
@@ -41,13 +36,53 @@ class UsersService {
         $user = UsersRepository::createUser([
             'name' => $details['name'],
             'email' => $details['email'],
-            'password' => $details['password']
+            'password' => $details['password'],
+            'package_id' => 1,
         ]);
 
+        // Create Default Project
+        $project = ProjectsRepository::create($user, [
+            'name' => $details['project']['name'] ?? 'My Project',
+            'website' => $details['project']['website'] ?? null,
+            'active' => 1,
+        ]);
+        UsersRepository::setDefaultProject($user, $project);
+
+        // Create Demo Form
+        $testForm = FormsService::createForm($project, [
+            'name' => 'Test Form (demo)',
+            'recipients' => [
+                [
+                    'id' => -1,
+                    'email' => $details['email'],
+                ],
+            ],
+            'color_id' => 32,
+        ], true);
+
+        // Create Default Form
+        FormsService::createForm($project, [
+            'name' => 'Contact Form',
+            'recipients' => [
+                [
+                    'id' => -1,
+                    'email' => $details['email'],
+                ],
+            ],
+            'color_id' => 26,
+        ]);
+
+        // Create demo submissions
+        SubmissionsService::generateDemoSubmissions($testForm);
+
+        // Create starter tags
+        TagsService::createDemoTags($user);
+
         return new Response([
-            'status' => 'success',
-            'token' => UsersRepository::generateAccessToken($user),
+            'status' => "success",
             'user' => $user->makeHidden(['created_at', 'updated_at', 'id']),
+            'project' => $project,
+            'token' => UsersRepository::generateAccessToken($user),
         ], 200);
     }
 

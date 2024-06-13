@@ -1,9 +1,10 @@
 <template>
     <header>
         <nav class="navbar navbar-expand navbar-light bg-light">
-            <!-- Escape link -->
+            
+            <!-- Escape link & Logo -->
             <router-link class="navbar-brand" to="/">
-                <h2>LOGO</h2>
+                <img src="@/assets/logo.svg" alt="FormFlow" title="FormFlow">
             </router-link>
 
             <!-- Projects dropdown -->
@@ -22,15 +23,15 @@
                 <FormsDropdown></FormsDropdown>
 
                 <li class="nav-item">
-                    <router-link to="/" class="nav-link" exact>
-                        <img src="@/assets/icons/home.svg" alt="Dashboard">
+                    <router-link to="/submissions" class="nav-link" exact>
+                        <img src="@/assets/icons/submissions.svg" alt="Dashboard">
                         <span>Submissions</span>
                     </router-link>
                 </li>
 
                 <li class="nav-item">
-                    <router-link to="/" class="nav-link" exact>
-                        <img src="@/assets/icons/home.svg" alt="Dashboard">
+                    <router-link to="/tags" class="nav-link" exact>
+                        <img src="@/assets/icons/tags.svg" alt="Dashboard">
                         <span>Tags</span>
                     </router-link>
                 </li>
@@ -39,11 +40,13 @@
 
             <!-- Profile dropdown -->
             <ProfileDropdown/>
+            
         </nav>
     </header>
 </template>
 
 <script>
+import { useMainStore } from "@/store";
 import ProfileDropdown from "@/components/navigation/ProfileDropdown";
 import ProjectsDropdown from "@/components/navigation/ProjectsDropdown";
 import FormsDropdown from "@/components/navigation/FormsDropdown";
@@ -51,9 +54,13 @@ import FormsDropdown from "@/components/navigation/FormsDropdown";
 export default {
     name: "AppNavigation",
     components: {ProfileDropdown, ProjectsDropdown, FormsDropdown},
+	setup() {
+        const store = useMainStore();
+        return { store }
+    },
     computed: {
         user() {
-            return this.$store.getters.user;
+			return this.store.getUser;
         }
     }
 }
@@ -241,9 +248,6 @@ header {
                             margin-bottom: 0.15rem;
                         }
 					}
-
-					span {
-					}
 				}
 
 				&.open {
@@ -255,65 +259,6 @@ header {
                             filter: none;
                             opacity: 1;
                         }
-					}
-				}
-
-				a.nav-button {
-					color: $white;
-					background: $primary;
-					font-size: 1rem;
-					font-weight: 600;
-					padding: 7.5px 20px;
-					border-radius: $box-border-radius;
-					position: relative;
-					margin-left: 10px;
-					text-decoration: none;
-					display: block;
-					user-select: none;
-
-					@extend .animated;
-
-					&:hover {
-						color: $white;
-						background: $primary-darker;
-					}
-
-					&:active {
-						color: $white;
-						background: $dark;
-					}
-				}
-
-				a.nav-image {
-					padding: 0;
-					border-radius: 50%;
-					width: 36px;
-					height: 36px;
-					text-align: center;
-					line-height: 36px;
-					position: relative;
-					display: block;
-					margin: 0 -2.5px;
-
-					@extend .animated;
-
-					&:hover {
-						background: $hover-grey;
-						color: $primary;
-
-						img {
-							filter: grayscale(0);
-						}
-					}
-
-					&:active {
-						background: $active-grey;
-					}
-
-					img {
-						width: 18px;
-						height: 18px;
-						filter: grayscale(1);
 					}
 				}
 			}

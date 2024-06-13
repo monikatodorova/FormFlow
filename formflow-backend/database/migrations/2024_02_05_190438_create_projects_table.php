@@ -16,7 +16,6 @@ return new class extends Migration
             $table->bigInteger('user_id')->unsigned();
             $table->string('name');
             $table->string('website')->nullable();
-            $table->string('category')->nullable();
             $table->boolean('active')->default(true);
             $table->timestamps();
 

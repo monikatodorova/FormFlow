@@ -6,8 +6,6 @@ use App\Models\Project;
 use App\Repositories\ProjectsRepository;
 use App\Repositories\UsersRepository;
 use Illuminate\Http\Response;
-use Illuminate\Support\Facades\Validator;
-use Illuminate\Validation\ValidationException;
 
 class ProjectsService {
 
@@ -33,7 +31,6 @@ class ProjectsService {
             'project' => ProjectsRepository::create(UsersRepository::getCurrentUser(), [
                 'name' => $details['name'],
                 'website' => $details['website'],
-                'category' => $details['category'] ?? null,
                 'active' => 1,
             ]),
         ], 200);
@@ -82,7 +79,6 @@ class ProjectsService {
     public static function updateProject(Project $project, array $details) {
         if(isset($details['name'])) ProjectsRepository::updateAttribute($project, 'name', $details['name']);
         if(isset($details['website'])) ProjectsRepository::updateAttribute($project, 'website', $details['website']);
-        if(isset($details['category'])) ProjectsRepository::updateAttribute($project, 'category', $details['category']);
         if(isset($details['active'])) ProjectsRepository::updateAttribute($project, 'active', $details['active'] == 1 ? 1 : 0);
         return new Response([
             'status' => 'success',

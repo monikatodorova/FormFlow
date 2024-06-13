@@ -29,7 +29,7 @@ class ProjectsController extends Controller
         return ProjectsService::updateProject($project, $request->all());
     }
 
-    public function statistics(Project $project) {
-        return StatisticsService::getStatisticsForProject($project);
+    public function statistics(Project $project, Request $request) {
+        return StatisticsService::getStatisticsForProject($project, $request);
     }
 }

@@ -2,7 +2,7 @@
     <form action="#" @submit.prevent="submitForm" method="post" class="form-wrapper">
         <div v-if="!token">
             <h4>New Project</h4>
-            <p>Please enter details</p>
+            <p>To create your project, simply enter your project details below.</p>
             <div class="form-group">
                 <label>Project Name</label>
                 <input type="text" class="form-control" name="name" v-model="name" required>
@@ -68,5 +68,9 @@ export default {
 </script>
 
 <style>
-
+h4 {
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin: 10px 0;
+}
 </style>

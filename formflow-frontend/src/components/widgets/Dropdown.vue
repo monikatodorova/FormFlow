@@ -1,5 +1,5 @@
 <template>
-    <div :class="{'dropdown-wrapper': true, 'open': open}" @click="handleDropdownClick">
+    <div :class="{'dropdown-wrapper': true, 'open': open}" v-click-away="handleDropdownClick">
         <div class="dropdown-toggle" @click.prevent="toggleDropdown">
             <slot name="toggle"></slot>
         </div>
@@ -10,9 +10,15 @@
 </template>
 
 <script>
+import { useMainStore } from '@/store';
+
 export default {
     name: "DropdownWidget",
     props: ['position', 'elementClass'],
+	setup() {
+        const store = useMainStore();
+        return { store }
+    },
     data() {
         return {
             open: false,
@@ -28,14 +34,13 @@ export default {
         },
         showDropdown() {
             this.open = true;
-            this.$store.commit("saveDropdown", this);
+			this.store.saveDropdown(this);
         },
         hideDropdown() {
             this.open = false;
-            this.$store.commit("clearDropdown");
+			this.store.clearDropdown();
         },
         handleDropdownClick(event) {
-            // Check if the click is outside of the dropdown
             if (!this.$el.contains(event.target)) {
                 this.hideDropdown();
             }
@@ -44,13 +49,12 @@ export default {
 }
 </script>
 
-<style lang="scss" scoped>
+<style lang="scss">
 @import "src/scss/variables";
 
 .dropdown-wrapper {
     position: relative;
 
-    // dropdown toggle
     .dropdown-toggle {
         position: relative;
         display: block;
@@ -58,7 +62,6 @@ export default {
         user-select: none;
     }
 
-    // dropdown menu
     .dropdown-menu {
 		opacity: 0;
         display: block;
@@ -214,82 +217,6 @@ export default {
         }
     }
 
-    &.options-dropdown {
-		.dropdown-toggle {
-			&:after {
-				display: none;
-			}
-
-			&:hover {
-				color: $primary;
-			}
-
-			.options-dropdown-toggle {
-				font-size: 0.8rem;
-				color: $grey-text;
-				padding-right: 10px;
-
-				&:after {
-					display: inline-block;
-					vertical-align: middle;
-					width: 6px;
-					height: 6px;
-					transform-origin: center;
-					transform: rotate(45deg);
-					border-bottom: 2px solid $dark;
-					border-right: 2px solid $dark;
-					content: ' ';
-					margin-left: 3px;
-					margin-top: -2px;
-					opacity: 0.25;
-				}
-			}
-		}
-
-		.dropdown-menu {
-			left: auto;
-			right: -25px;
-		}
-	}
-
-    &.profile-status-dropdown {
-		.dropdown-toggle {
-			&:after {
-				display: none;
-			}
-
-			&:hover {
-				color: $primary;
-			}
-
-			.options-dropdown-toggle {
-				font-size: 0.8rem;
-				color: $grey-text;
-				padding-right: 10px;
-
-				&:after {
-					display: inline-block;
-					vertical-align: middle;
-					width: 6px;
-					height: 6px;
-					transform-origin: center;
-					transform: rotate(45deg);
-					border-bottom: 2px solid $dark;
-					border-right: 2px solid $dark;
-					content: ' ';
-					margin-left: 3px;
-					margin-top: -2px;
-					opacity: 0.25;
-				}
-			}
-		}
-
-		.dropdown-menu {
-			left: auto;
-			right: 0;
-		}
-	}
-
     &.tags-dropdown {
 		.dropdown-toggle {
 			&:after {
@@ -298,27 +225,6 @@ export default {
 
 			&:hover {
 				color: $primary;
-			}
-
-			.options-dropdown-toggle {
-				font-size: 0.8rem;
-				color: $grey-text;
-				padding-right: 10px;
-
-				&:after {
-					display: inline-block;
-					vertical-align: middle;
-					width: 6px;
-					height: 6px;
-					transform-origin: center;
-					transform: rotate(45deg);
-					border-bottom: 2px solid $dark;
-					border-right: 2px solid $dark;
-					content: ' ';
-					margin-left: 3px;
-					margin-top: -2px;
-					opacity: 0.25;
-				}
 			}
 		}
 

@@ -3,7 +3,6 @@
 namespace App\Models;
 
 use App\Models\Subscriptions\Package;
-use App\Models\Subscriptions\Payment;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -34,10 +33,6 @@ class User extends Authenticatable
 
     public function package() {
         return $this->belongsTo(Package::class);
-    }
-
-    public function payments() {
-        return $this->hasMany(Payment::class);
     }
 
     // Methods

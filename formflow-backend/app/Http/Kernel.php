@@ -66,6 +66,8 @@ class Kernel extends HttpKernel
         'verified' => \Illuminate\Auth\Middleware\EnsureEmailIsVerified::class,
         'ownership.project' => \App\Http\Middleware\ConfirmProjectOwnership::class,
         'ownership.form' => \App\Http\Middleware\ConfirmFormOwnership::class,
+        'ownership.submission' => \App\Http\Middleware\ConfirmSubmissionOwnership::class,
+        'ownership.tag' => \App\Http\Middleware\ConfirmTagOwnership::class,
         'relationship.project-form' => \App\Http\Middleware\ConfirmProjectFormRelationship::class,
         'cors' => \Illuminate\Http\Middleware\HandleCors::class,
     ];

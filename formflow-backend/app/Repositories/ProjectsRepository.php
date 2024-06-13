@@ -4,8 +4,6 @@ namespace App\Repositories;
 
 use App\Models\Project;
 use App\Models\User;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Hash;
 
 class ProjectsRepository {
 
@@ -14,7 +12,15 @@ class ProjectsRepository {
      * @return mixed
      */
     public static function getAllProjects(User $user) {
-        return $user->projects;
+        $projects = $user->projects()->withCount('forms')->orderByDesc('id')->get()->makeHidden(['user_id']);
+        foreach ($projects as $project) {
+            $project->submissions_count = $project->forms->sum(function ($form) {
+                return $form->total_submissions;
+            });
+            unset($project->forms);
+        }
+
+        return $projects;
     }
 
     /**
@@ -34,7 +40,6 @@ class ProjectsRepository {
         return Project::create([
             'name' => $details['name'],
             'website' => $details['website'],
-            'category' => $details['category'],
             'user_id' => $user->getId(),
             'active' => $details['active'],
         ]);

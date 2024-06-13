@@ -18,20 +18,24 @@
   
 <script>
 import { useEventBus } from '@/EventBus';
+import { useMainStore } from '@/store';
 import ProjectBox from "@/components/items/ProjectBox";
+
 
 export default {
   name: 'ProjectsView',
   props: ['token'],
   components: {ProjectBox},
+  setup() {
+        const store = useMainStore();
+        return { store }
+    },
   computed: {
       projects() {
-        // useEventBus().emit('reloadProjects');
-        console.log(this.$store.getters.projects.items);
-        return this.$store.getters.projects;
+        return this.store.getProjects;
       },
       currentProject() {
-        return this.$store.getters.currentProject;
+        return this.store.getCurrentProject;
       }
   },
   mounted() {
