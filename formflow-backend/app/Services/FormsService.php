@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\Project;
 use App\Models\Form;
+use App\Models\Recipient;
 use App\Models\Submission;
 use App\Repositories\FormsRepository;
 use App\Repositories\ColorsRepository;
@@ -46,6 +47,12 @@ class FormsService {
         $color = ColorsRepository::getColor($details['color_id'] ?? null);
         $form = FormsRepository::createForm($project, $color, [
             'name' => $details['name'],
+        ]);
+
+        Recipient::create([
+            'email' => 'test@email.com',
+            'vefiried' => 1,
+            'form_id' => $form->getId(),
         ]);
 
         if($returnObject) return $form;

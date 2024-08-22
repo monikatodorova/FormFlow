@@ -1,11 +1,11 @@
 <template>
-	<Dropdown class="tags-dropdown">
+	<Dropdown :class="{'tags-dropdown': true,}">
 		<template v-slot:toggle>
-			<strong>Add tag</strong>
+			<strong>{{ this.mode === 'add' ? 'Add tag' : 'Select tag to filter' }}</strong>
 		</template>
 		<template v-slot:content>
 			<h4>Choose Tag</h4>
-			<button @click.prevent="saveTag(tag)" v-for="(tag, key) in userTags" :key="key" class="dropdown-link">
+			<button @click.prevent="handleTagClick(tag)" v-for="(tag, key) in userTags" :key="key" class="dropdown-link">
 				{{ tag.name }}
 			</button>
 			<p v-if="userTags.length === 0" class="small">No more tags available.</p>
@@ -16,13 +16,14 @@
 <script>
 import Dropdown from "./Dropdown";
 import repository from "../../repository/repository";
+import { useEventBus } from "@/EventBus";
 
 import { useMainStore } from "@/store";
 
 export default {
     name: "TagsDropdown",
     components: {Dropdown},
-    props: ['tags', 'submissionId', 'addTag'],
+    props: ['tags', 'submissionId', 'addTag', 'selectTag', 'mode'],
 	setup() {
         const store = useMainStore();
         return {
@@ -51,6 +52,13 @@ export default {
                 .catch(error => {
                     console.log(error);
                 })
+        },
+		handleTagClick(tag) {
+            if (this.mode === 'add') {
+                this.saveTag(tag);
+            } else if (this.mode === 'select') {
+				useEventBus().emit('select-tag', tag);
+            }
         },
     },
     computed: {

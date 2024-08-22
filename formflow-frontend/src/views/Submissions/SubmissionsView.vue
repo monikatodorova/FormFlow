@@ -3,7 +3,33 @@
         <div class="submissions-list-view" id="submissions-list-view">
 
             <div class="submissions-list-wrapper">
-                <h1 class="mb-4">Project Submissions</h1>
+                <div class="row">
+                    <div class="col-md-8">
+                        <h1 class="mb-4">Project Submissions</h1>
+                    </div>
+
+                    <!-- Filter by submission status -->
+                    <div class="col-md-4 mb-4">
+                        <div class="submissions-filter" v-if="loaded">
+                            <div class="select-wrapper">
+                                <select v-model="status" class="form-control submissions-select">
+                                    <option value="all" selected>All Submissions</option>
+                                    <option value="new">New Submissions</option>
+                                    <option value="seen">Seen Submissions</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Filter submissions by tag -->
+                    <div class="col-md-12 mb-4">
+                        <div class="submission-fields" v-if="loaded">
+                            <TagsWidget :tags="tags" :select-tag="selectTag" mode="select" v-if="loaded"></TagsWidget>
+                        </div>
+                    </div>
+
+                </div>
+                
 
                 <div class="submissions-list" ref="submissionsList">
 
@@ -50,13 +76,14 @@
 <script>
 import repository from '@/repository/repository'
 import SubmissionBox from '@/components/items/SubmissionBox'
+import TagsWidget from "@/components/widgets/TagsWidget";
 import { useEventBus } from "@/EventBus";
 
 import { useMainStore } from '@/store';
 
 export default {
     name: 'SubmissionsView',
-    components: {SubmissionBox},
+    components: {SubmissionBox, TagsWidget},
     setup() {
         const store = useMainStore();
         return {
@@ -66,8 +93,11 @@ export default {
     data() {
         return {
             items: [],
+            submissions: [],
             formId: null,
             loaded: false,
+            status: 'all',
+            tags: [],
             meta: {
                 next: null,
                 totalSubmissions: null,
@@ -77,6 +107,32 @@ export default {
     },
     created() {
         this.loadSubmissions(true);
+        useEventBus().on('select-tag', (tag) => {
+            this.tags.push(tag);
+            this.filterSubmissionsByTags();
+        });
+        useEventBus().on('deselect-tag', (tag) => {
+            const index = this.tags.findIndex(t => t.hashId === tag.hashId);
+            if (index !== -1) {
+                this.tags.splice(index, 1);
+            }
+            this.filterSubmissionsByTags();
+        });
+        useEventBus().on('updateSubmissions', (actionData) => {
+            const { submission, action, tag } = actionData;
+            const submissionIndex = this.items.findIndex(item => item.hashId === submission);
+            if (submissionIndex !== -1) {
+                if (action === 'add') {
+                    if (!this.items[submissionIndex].tags.some(t => t.hashId === tag.hashId)) {
+                        this.items[submissionIndex].tags.push(tag);
+                    }
+                } else if (action === 'remove') {
+                    this.items[submissionIndex].tags = this.items[submissionIndex].tags.filter(t => t.hashId !== tag.hashId);
+                }
+            }
+
+            this.filterSubmissionsByTags(this.status, true);
+        });
     },
     mounted() {
         useEventBus().emit("reloadProjects");
@@ -87,11 +143,11 @@ export default {
         this.$refs.submissionsList.removeEventListener("scroll", this.handleScroll)
     },
     methods: {
-        loadSubmissions(clear = false) {
+        loadSubmissions(status, clear = false) {
             if(clear) this.items = [];
             this.loaded = false;
             if(!this.projectId) return;
-            repository.get("/submissions" + (this.formId ? "?form=" + this.formId : ""))
+            repository.get("/submissions" + (this.formId ? "?form=" + this.formId : "") + ("?status=" + this.status))
                 .then(response => {
                     this.items.push(...response.data.items);
                     this.meta.next = response.data.cursor;
@@ -124,14 +180,27 @@ export default {
                 this.loadMore();
             }
         },
+        selectTag(tag) {
+            this.tags = tag;
+            this.filterSubmissionsByTags();
+        },
+        filterSubmissionsByTags() {
+            if (this.tags.length > 0) {
+                this.submissions = this.items.filter(item =>
+                    item.tags.some(tag => this.tags.some(selectedTag => selectedTag.hashId === tag.hashId))
+                );
+            } else {
+                this.submissions = this.items;
+            }
+        },
     },
     computed: {
         filteredItems() {
             if(!this.loaded) return [];
-            return this.items;
+            this.filterSubmissionsByTags();
+            return this.submissions;
         },
         projectId() {
-            // return this.$store.getters.currentProject.hashId;
             return this.store.getCurrentProject.hashId;
         },
         hasOpenSubmission() {
@@ -147,12 +216,47 @@ export default {
         projectId: function (newValue) {
             if(newValue !== null) this.loadSubmissions(true);
         },
+        status(newStatus) {
+			this.loadSubmissions(newStatus, true);
+		}
     }
 }
 </script>
 
 <style lang="scss" scoped>
 @import "src/scss/variables";
+
+.submissions-filter {
+    position: relative;
+}
+
+.select-wrapper {
+    position: relative;
+}
+
+.submissions-select {
+    padding-right: 30px;
+    width: 100%;
+}
+
+.select-wrapper::after {
+    display: inline-block;
+    vertical-align: middle;
+    width: 6px;
+    height: 6px;
+    transform-origin: center;
+    transform: rotate(45deg);
+    border-bottom: 2px solid #0E122E;
+    border-right: 2px solid #0E122E;
+    content: " ";
+    margin-left: auto;
+    margin-top: -2px;
+    opacity: 0.25;
+    right: 10px;
+    top: 50%;
+    position: absolute;
+    pointer-events: none;
+}
 
 .submissions-wrapper {
     padding: 0;

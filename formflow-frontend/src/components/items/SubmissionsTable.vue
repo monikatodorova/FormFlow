@@ -3,17 +3,17 @@
 
         <div class="row align-items-center mb-3" v-if="!loaded || (!showTitle && items.length > 0) || showTitle">
 			<div class="col-12 col-md-6 p-0" v-if="loaded">
-                <h4 class="mb-0">All Submissions</h4>
+                <h4 class="mb-0">{{ capitalizeFirstLetter(status) }} Submissions</h4>
 			</div>
             <div class="col-12 col-md-6" v-if="loaded">
                 <div class="submissions-filter">
-                    <span>Submissions per page</span>
-                    <select v-model="perPage" class="form-control">
-                        <option value="20" selected>20</option>
-                        <option value="50">50</option>
-                        <option value="100">100</option>
-                        <option value="all">All</option>
-                    </select>
+                    <div class="select-wrapper">
+                        <select v-model="status" class="form-control submissions-select">
+                            <option value="all" selected>All Submissions</option>
+                            <option value="new">New Submissions</option>
+                            <option value="seen">Seen Submissions</option>
+                        </select>
+                    </div>
                 </div>
             </div>
 		
@@ -65,12 +65,21 @@
             </div>
 
             <!-- Load more & total results -->
-            <div class="submissions-results d-flex align-items-center mt-4" v-if="loaded">
+            <div class="submissions-results d-flex align-items-center mt-2" v-if="loaded" style="justify-content: space-between;">
                 <div :class="{'load-more': true, 'd-none': meta.next === null}">
                     <span v-if="!meta.loading" class="toggler" @click.prevent="loadMore">Load more</span>
                     <span v-if="meta.loading" class="spinner-border"></span>
                 </div>
                 <p class="small m-0">Showing {{ items.length }} out of {{ meta.totalSubmissions }} submissions</p>
+                <div class="submissions-filter m-0">
+                    <span>Submissions per page</span>
+                    <select v-model="perPage" class="form-control">
+                        <option value="20" selected>20</option>
+                        <option value="50">50</option>
+                        <option value="100">100</option>
+                        <option value="all">All</option>
+                    </select>
+                </div>
             </div>
         </div>
 
@@ -91,7 +100,7 @@ import dayjs from 'dayjs';
 
 export default {
     name: "SubmissionsTable",
-    props: ['formId', 'status'],
+    props: ['formId'],
     setup() {
         const store = useMainStore();
         return {
@@ -102,6 +111,7 @@ export default {
         return {
             items: [],
             perPage: 20,
+            status: 'all',
             loaded: false,
             meta: {
                 next: null,
@@ -212,6 +222,39 @@ export default {
 
 <style lang="scss" scoped>
 @import "src/scss/variables";
+
+.submissions-filter {
+    position: relative;
+}
+
+.select-wrapper {
+    position: relative;
+}
+
+.submissions-select {
+    padding-right: 30px;
+    width: 100%;
+}
+
+.select-wrapper::after {
+    display: inline-block;
+    vertical-align: middle;
+    width: 6px;
+    height: 6px;
+    transform-origin: center;
+    transform: rotate(45deg);
+    border-bottom: 2px solid #0E122E;
+    border-right: 2px solid #0E122E;
+    content: " ";
+    margin-left: auto;
+    margin-top: -2px;
+    opacity: 0.25;
+    right: 10px;
+    top: 50%;
+    position: absolute;
+    pointer-events: none;
+}
+
 
 .submissions-table-wrapper {
 	padding: 0 1.5rem 0 1.5rem;

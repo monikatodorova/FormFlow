@@ -1,16 +1,17 @@
 <template>
 	<div :class="{'tag-item': true, 'deleting': deleting}">
 		<strong>{{ data.name }}</strong>
-		<button class="btn" @click.prevent="removeTag"></button>
+		<button class="btn" @click.prevent="handleRemoveClick(data)"></button>
 	</div>
 </template>
 
 <script>
 import repository from "../../repository/repository";
+import { useEventBus } from "@/EventBus";
 
 export default {
     name: "TagWidget",
-    props: ['data', 'submissionId', 'deleteTag'],
+    props: ['data', 'submissionId', 'deleteTag', 'mode'],
     data() {
         return {
             deleting: false,
@@ -28,7 +29,14 @@ export default {
                     console.log(error);
                     this.deleting = false;
                 })
-        }
+        },
+		handleRemoveClick(tag) {
+			if(this.mode === 'add') {
+				this.removeTag();
+			} else if (this.mode === 'select') {
+				useEventBus().emit('deselect-tag', tag);
+			}
+		}
     },
     computed: {
         tagId() {

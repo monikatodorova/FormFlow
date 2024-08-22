@@ -68,7 +68,7 @@
                 <img src="@/assets/icons/tags.svg" alt="Tags">
                 <span>Submission Tags</span>
             </h3>
-            <TagsWidget :tags="tags" :submission-id="id" :add-tag="addTag" :delete-tag="deleteTag" v-if="loaded"></TagsWidget>
+            <TagsWidget :tags="tags" :submission-id="id" :add-tag="addTag" :delete-tag="deleteTag" mode="add" v-if="loaded"></TagsWidget>
         </div>
     </div>
 </template>
@@ -76,6 +76,7 @@
 <script>
 import repository from "@/repository/repository";
 import TagsWidget from "@/components/widgets/TagsWidget";
+import { useEventBus } from "@/EventBus";
 
 export default {
     name: "SubmissionDetails",
@@ -170,10 +171,14 @@ export default {
         },
         addTag(tag) {
             this.tags.push(tag);
+            let actionData = {"submission": this.submissionId ,"action": "add", "tag": tag};
+            useEventBus().emit('updateSubmissions', actionData);
         },
         deleteTag(tag) {
             let index = this.tags.findIndex(t => t.hashId === tag.hashId);
             this.tags.splice(index, 1);
+            let actionData = {"submission": this.submissionId, "action": "remove", "tag": tag};
+            useEventBus().emit('updateSubmissions', actionData);
         }
     },
     computed: {

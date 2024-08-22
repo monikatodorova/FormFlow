@@ -232,7 +232,7 @@ export default {
 			left: -2px;
 			right: auto;
             top: auto;
-            bottom: calc(100% + 12px);
+            // bottom: calc(100% + 12px);
             max-height: 200px;
             min-width: 200px;
 
