@@ -1,19 +1,20 @@
 <template>
     <div class="submissions-table-wrapper">
 
-        <div class="row align-items-center mb-3" v-if="!loaded || (!showTitle && items.length > 0) || showTitle">
+        <div class="row align-items-center mb-3" v-if="!loaded || items.length > 0">
 			<div class="col-12 col-md-6 p-0" v-if="loaded">
                 <h4 class="mb-0">{{ capitalizeFirstLetter(status) }} Submissions</h4>
 			</div>
             <div class="col-12 col-md-6" v-if="loaded">
                 <div class="submissions-filter">
                     <div class="select-wrapper">
-                        <select v-model="status" class="form-control submissions-select">
+                        <select v-model="status" class="form-control submissions-select" style="padding: 10px 15px;">
                             <option value="all" selected>All Submissions</option>
                             <option value="new">New Submissions</option>
                             <option value="seen">Seen Submissions</option>
                         </select>
                     </div>
+                    <button @click="exportSubmissions" class="btn btn-primary d-block btn-export" style="margin-left: 10px; border-radius: 0.375rem;">Export submissions</button>
                 </div>
             </div>
 		
@@ -94,7 +95,6 @@
 <script>
 import { useEventBus } from '@/EventBus'
 import repository from '@/repository/repository'
-
 import { useMainStore } from '@/store';
 import dayjs from 'dayjs';
 
@@ -165,7 +165,27 @@ export default {
 		},
         formattedDate(submitedOn) {
             return dayjs(submitedOn).format('MMMM D, YYYY, h:mm A');
-        }
+        },
+        exportSubmissions() {
+        let endpoint = '/forms/' + this.formId + '/submissions/export'
+        repository.get(endpoint)
+            .then(response => {
+                // console.log('Export successful:', response);
+                const blob = new Blob([response.data], { type: 'text/csv;charset=utf-8;' });
+                const link = document.createElement('a');
+                const url = window.URL.createObjectURL(blob);
+                link.href = url;
+                link.setAttribute('download', 'submissions.csv');
+                document.body.appendChild(link);
+                link.click();
+                link.parentNode.removeChild(link);
+                window.URL.revokeObjectURL(url);
+            })
+            .catch(error => {
+                console.error('Error exporting submissions:', error);
+            });
+        },
+        
     },
     created() {
         this.loadFormSubmissions(this.status, this.perPage, true);

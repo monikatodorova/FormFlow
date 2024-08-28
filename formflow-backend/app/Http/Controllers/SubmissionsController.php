@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Services\SubmissionsService;
 use App\Models\Tag;
 use App\Models\Submission;
+use App\Models\Form;
+use App\Models\Project;
 use App\Repositories\UsersRepository;
 use Illuminate\Http\Request;
 
@@ -28,6 +30,10 @@ class SubmissionsController extends Controller {
 
     public function deleteTag(Submission $submission, Tag $tag) {
         return SubmissionsService::removeTag($submission, $tag);
+    }
+
+    public function export(Form $form) {
+        return SubmissionsService::export($form);
     }
 
 }

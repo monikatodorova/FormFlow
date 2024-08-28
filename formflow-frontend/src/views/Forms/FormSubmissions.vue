@@ -32,7 +32,6 @@
               <div v-else-if="selectedTab === 'Statistics'">
                 <!-- Statistics tab -->
                 <FormAnalytics :form-id="formId" :project-id="this.projectId"></FormAnalytics>
-                <p>Statistics content goes here...</p>
               </div>
 
               <div v-else-if="selectedTab === 'Settings'">

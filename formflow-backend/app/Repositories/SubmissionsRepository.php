@@ -10,6 +10,10 @@ class SubmissionsRepository {
 
     public const RESULTS_PER_PAGE = 20;
 
+    public static function getUnpaginatedSubmissionsForForm(Form $form) {
+        return Submission::query()->where('form_id', '=', $form->getId())->get();
+    }
+
     /**
      * Gets all submissions for the provided form, and filters them by their status if needed.
      * @param Form $form

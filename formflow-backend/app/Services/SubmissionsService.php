@@ -11,6 +11,7 @@ use App\Repositories\TagsRepository;
 use App\Repositories\UsersRepository;
 use App\Repositories\FormsRepository;
 use Illuminate\Http\Response;
+use Illuminate\Support\Facades\Crypt;
 
 class SubmissionsService {
 
@@ -154,6 +155,43 @@ class SubmissionsService {
         Submission::factory()->count($totalSubmissions)->create([
             'form_id' => $form->id,
         ]);
+    }
+
+    public static function export($form) {
+        $filename = 'submissions.csv';
+
+        $headers = [
+            'Content-Type' => 'text/csv',
+            'Content-Disposition' => 'attachment; filename="' . $filename . '"',
+            // 'Pragma' => 'public',
+            'Cache-Control' => 'must-revalidate, post-check=0, pre-check=0',
+            'Expires' => '0',
+        ];
+
+        $submissions = SubmissionsRepository::getUnpaginatedSubmissionsForForm($form);
+
+        $callback = function() use ($submissions) {
+            $handle = fopen('php://output', 'w');
+
+            if (!empty($submissions)) {
+                $fields = array_keys($submissions[0]['fields']);
+                fputcsv($handle, $fields);
+
+                foreach ($submissions as $submission) {
+                    $response = array_values($submission['fields']);
+                    fputcsv($handle, $response);
+                }
+            } else {
+                fputcsv($handle, ['No submissions found']);
+            }
+
+            fclose($handle);
+        };
+
+        if (ob_get_level()) {
+            ob_end_clean();
+        }
+        return response()->stream($callback, 200, $headers);
     }
 
     /**

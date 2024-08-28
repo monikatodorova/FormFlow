@@ -127,6 +127,10 @@ Route::middleware('auth:api')->group(function() {
         ->middleware('ownership.project')
         ->middleware('ownership.form')
         ->middleware('relationship.project-form');
+    
+    Route::get("/forms/{form}/submissions/export", [SubmissionsController::class, 'export'])
+        ->name('api.submissions.export')
+        ->middleware('ownership.form');
 
 
     /**
