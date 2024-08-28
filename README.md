@@ -1,4 +1,7 @@
-Prerequisites
+**FormFlow** is an application for collecting and managing submissions from online forms.
+
+Prerequisites to run the project
+
 Before you start, ensure you have the following installed on your machine:
 
 1. XAMPP (includes Apache, PHP, and MySQL)
