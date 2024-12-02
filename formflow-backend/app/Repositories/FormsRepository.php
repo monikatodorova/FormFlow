@@ -35,6 +35,8 @@ class FormsRepository {
     public static function createForm(Project $project, Color $color, array $details) {
         return Form::create([
             'name' => $details['name'],
+            'form_type' => $details['form_type'],
+            'fields' => $details['fields'],
             'project_id' => $project->getId(),
             'color_id' => $color->getId(),
         ]);
@@ -47,6 +49,15 @@ class FormsRepository {
      */
     public static function details(Form $form) {
         return Form::query()->with('recipients')->where("id", "=", $form->getId())->first()->makeHidden(['project_id', 'id', 'project'])->makeVisible(['color_id'])->append(['secret']);
+    }
+
+    /**
+     * Returns the details for the provided form.
+     * @param Form $form
+     * @return \Illuminate\Database\Eloquent\Builder|\Illuminate\Database\Eloquent\Model|object
+     */
+    public static function preview(Form $form) {
+        return Form::query()->where("id", "=", $form->getId())->first()->makeHidden(['project_id', 'id', 'project', 'total_submissions', 'new_submissions'])->makeVisible(['color_id'])->append(['secret']);
     }
 
      /**

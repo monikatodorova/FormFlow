@@ -122,6 +122,11 @@ export default {
 }
 </script>
 
-<style lang="scss" scoped>
-
+<style scoped lang="scss">
+.form-group {
+    .form-control {
+        height: 50px;
+        margin-bottom: 10px;
+    }
+}
 </style>

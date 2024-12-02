@@ -101,7 +101,6 @@
     },
     methods: {
         loadSubmissionsDistribution(reload = false) {
-            console.log("HERE " + this.projectId);
             if(!this.projectId) return;
             if(reload) {
                 this.distribution.loaded = false;
@@ -113,20 +112,21 @@
             this.distribution.oldTotal = this.distribution.total;
             repository.get("/projects/" + this.projectId + "/forms/" + this.formId + "/statistics")
                 .then(response => {
-                    console.log(response);
-                    this.distribution.total = response.data.total;
-                    this.distribution.new = response.data.new;
-                    this.distribution.seen = response.data.seen;
-                    this.distribution.today = response.data.today;
-                    this.distribution.week = response.data.week;
-                    this.distribution.month = response.data.month;
-                    this.distribution.loaded = true;
-                    this.daily = response.data.daily;
-                    this.form.name = response.data.form.name;
-                    this.form.color.background = response.data.form.color.color;
-                    this.form.color.isDarkText = response.data.form.color.text === "dark";
-                    this.loaded = true;
-                    // this.count();
+                    if (response) {
+                        this.distribution.total = response.data.total;
+                        this.distribution.new = response.data.new;
+                        this.distribution.seen = response.data.seen;
+                        this.distribution.today = response.data.today;
+                        this.distribution.week = response.data.week;
+                        this.distribution.month = response.data.month;
+                        this.distribution.loaded = true;
+                        this.daily = response.data.daily;
+                        this.form.name = response.data.form.name;
+                        this.form.color.background = response.data.form.color.color;
+                        this.form.color.isDarkText = response.data.form.color.text === "dark";
+                        this.loaded = true;
+                        // this.count();
+                    }
                 })
                 .catch(() => {
                     console.log("Failed loading submission statistics");

@@ -6,7 +6,7 @@
           <h4 class="form-name">{{ selectedForm.name }}</h4>
           <nav>
             <ul class="nav nav-pills">
-              <li class="nav-item" v-for="tab in tabs" :key="tab.name">
+              <li class="nav-item" v-for="tab in filteredTabs" :key="tab.name">
                 <a class="nav-link" :class="{ active: selectedTab === tab.name }" @click="selectedTab = tab.name" href="#">{{ tab.name }}</a>
               </li>
             </ul>
@@ -24,11 +24,6 @@
                 <SubmissionsTable :form-id="formId" :status="status"></SubmissionsTable>
               </div>
 
-              <div v-else-if="selectedTab === 'Connect'">
-                <!-- Connect tab -->
-                <ConnectForm :form-id="formId"></ConnectForm>
-              </div>
-
               <div v-else-if="selectedTab === 'Statistics'">
                 <!-- Statistics tab -->
                 <FormAnalytics :form-id="formId" :project-id="this.projectId"></FormAnalytics>
@@ -37,6 +32,21 @@
               <div v-else-if="selectedTab === 'Settings'">
                 <!-- Settings tab -->
                 <FormSettings :form-id="formId"></FormSettings>
+              </div>
+
+              <div v-else-if="selectedTab === 'Connect'">
+                <!-- Connect tab -->
+                <ConnectForm :form-id="formId"></ConnectForm>
+              </div>
+
+              <div v-else-if="selectedTab === 'Form Builder'">
+                <!-- Form Builder tab -->
+                <FormBuilder :form-id="formId"></FormBuilder>
+              </div>
+
+              <div v-else-if="selectedTab === 'AI Form'">
+                <!-- AI Form Generation tab -->
+                <AIForm :form-id="formId"></AIForm>
               </div>
 
             </div>
@@ -54,11 +64,13 @@ import SubmissionsTable from '@/components/items/SubmissionsTable';
 import ConnectForm from '@/components/items/ConnectForm';
 import FormAnalytics from '@/components/items/FormAnalytics';
 import FormSettings from '@/components/items/FormSettings';
+import FormBuilder from "@/components/items/FormBuilder.vue";
+import AIForm from "@/components/items/AIForm.vue";
   
 export default {
   name: 'FormSubmissions',
   props: ['token'],
-  components: {SubmissionsTable, ConnectForm, FormAnalytics, FormSettings},
+  components: {SubmissionsTable, ConnectForm, FormAnalytics, FormSettings, FormBuilder, AIForm},
   setup() {
       const store = useMainStore();
       return { store }
@@ -69,9 +81,11 @@ export default {
           selectedTab: 'Submissions',
           tabs: [
               { name: 'Submissions' },
-              { name: 'Connect' },
               { name: 'Statistics' },
-              { name: 'Settings' }
+              { name: 'Settings' },
+              { name: 'Connect', type: 'default' },
+              { name: 'Form Builder', type: 'builder' },
+              { name: 'AI Form', type: 'ai' },
           ],
           selectedForm: null,
           loaded: false
@@ -84,6 +98,10 @@ export default {
       projectId() {
           return this.store.getCurrentProject.hashId;
       },
+      filteredTabs() {
+        if (!this.selectedForm) return [];
+        return this.tabs.filter(tab => !tab.type || tab.type === this.selectedForm.form_type);
+      },
   },
   methods: {
       loadForm() {
@@ -91,8 +109,9 @@ export default {
           .then(response => {
               this.selectedForm = response.data;
               this.loaded = true;
+              this.store.updateCurrentForm(response.data);
           })
-      }
+      },
   },
   created: function () {
     if(this.projectId === null) {

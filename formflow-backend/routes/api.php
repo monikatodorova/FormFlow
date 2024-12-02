@@ -46,6 +46,9 @@ Route::post("/f/{formSecret}", [SubmissionsController::class, 'store'])
     ->name('api.submissions.store')
     ->middleware('cors');
 
+Route::get('/forms/{form}/preview', [FormsController::class, 'preview'])
+        ->name('api.forms.preview');
+
 
 
 // Authenticated users
@@ -98,6 +101,12 @@ Route::middleware('auth:api')->group(function() {
         ->name('api.forms.store')
         ->middleware('ownership.project');
 
+    Route::post('/projects/{project}/forms/{form}/generate-form', [FormsController::class, 'generateForm'])
+        ->name('api.forms.generate')
+        ->middleware('ownership.project')
+        ->middleware('ownership.form')
+        ->middleware('relationship.project-form');
+
     Route::get("/projects/{project}/forms/{form}", [FormsController::class, 'details'])
         ->name('api.forms.details')
         ->middleware('ownership.project')
@@ -131,7 +140,7 @@ Route::middleware('auth:api')->group(function() {
     Route::get("/forms/{form}/submissions/export", [SubmissionsController::class, 'export'])
         ->name('api.submissions.export')
         ->middleware('ownership.form');
-
+    
 
     /**
      * =========================

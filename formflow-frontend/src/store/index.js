@@ -22,6 +22,15 @@ export const useMainStore = defineStore('main', {
       name: null,
       loaded: false,
     },
+    currentForm: {
+      hashId: null,
+      name: null,
+      loaded: null,
+      color: null,
+      type: null,
+      fields: null,
+      prompt: null,
+    },
     dropdown: null,
     forms: {
       items: [],
@@ -37,6 +46,7 @@ export const useMainStore = defineStore('main', {
     getToken: (state) => state.user.token,
     getProjects: (state) => state.projects,
     getCurrentProject: (state) => state.currentProject,
+    getCurrentForm: (state) => state.currentForm,
     getDropdown: (state) => state.dropdown,
     getForms: (state) => state.forms,
     getTags: (state) => state.tags,
@@ -68,6 +78,15 @@ export const useMainStore = defineStore('main', {
       this.currentProject.hashId = project.hashId;
       this.currentProject.name = project.name;
       this.currentProject.loaded = true;
+    },
+    updateCurrentForm(form) {
+      this.currentForm.hashId = form.hashId;
+      this.currentForm.name = form.name;
+      this.currentForm.loaded = true;
+      this.currentForm.color = form.color;
+      this.currentForm.fields = form.fields;
+      this.currentForm.type = form.form_type;
+      this.currentForm.prompt = form.prompt;
     },
     clearDropdown() {
       this.dropdown = null;

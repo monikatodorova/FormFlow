@@ -50,6 +50,9 @@ export default {
         },
         formLink() {
             if (!this.loaded) return "Loading..";
+			if (this.form.form_type === null) {
+				return "/forms/" + this.form.hashId + "/options";
+			}
             return "/forms/" + this.form.hashId;
         },
 	}

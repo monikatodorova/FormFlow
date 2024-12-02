@@ -17,8 +17,12 @@ class Form extends Model
     protected $with = ['color'];
     protected $withCount = ['submissions AS total_submissions', 'newSubmissions as new_submissions'];
     protected $hidden = ['id', 'project_id', 'color_id', 'created_at', 'updated_at'];
-    protected $fillable = ['name', 'color_id', 'project_id'];
+    protected $fillable = ['name', 'color_id', 'project_id', 'form_type', 'fields', 'prompt_message'];
     protected $appends = ['hashId'];
+
+    protected $casts = [
+        'fields' => 'array',
+    ];
 
     // Relations
     public function user() {

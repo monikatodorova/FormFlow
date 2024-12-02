@@ -135,7 +135,7 @@ class SubmissionsService {
 
         // Save submission & notify recipients
         $submission = SubmissionsRepository::saveSubmission($form, $details, self::getSubmissionName($details), self::getSubmissionEmail($details));
-        FormsService::notifyRecipients($submission);
+        // FormsService::notifyRecipients($submission);
 
         // Response
         return new Response([

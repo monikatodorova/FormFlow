@@ -12,6 +12,8 @@ import SubmissionsView from '@/views/Submissions/SubmissionsView.vue'
 import NoSubmissionSelected from '@/views/Submissions/NoSubmissionSelected.vue'
 import SubmissionDetails from '@/views/Submissions/SubmissionDetails.vue'
 import TagsView from '@/views/Tags/TagsView.vue'
+import FormOptions from '@/views/Forms/FormOptions.vue';
+import FormPage from '@/views/Forms/FormPage.vue';
 
 const routes = [
   {
@@ -90,13 +92,32 @@ const routes = [
     component: FormSubmissions,
     meta: {
       requireAuth: true,
+      requireGuest: true,
+    },
+  },
+  {
+    path: '/forms/:id/preview',
+    name: 'Form Page',
+    component: FormPage,
+    meta: {
+      requireAuth: false,
       requireGuest: false,
+      previewForm: true
     },
   },
   {
     path: '/forms/new',
     name: 'New Form',
     component: CreateForm,
+    meta: {
+      requireAuth: true,
+      requireGuest: false,
+    },
+  },
+  {
+    path: '/forms/:id/options',
+    name: 'Form Options',
+    component: FormOptions,
     meta: {
       requireAuth: true,
       requireGuest: false,

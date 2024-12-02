@@ -86,7 +86,10 @@
 
 		<!-- No Submissions Found -->
 		<div class="submissions-no" v-if="loaded && meta.totalSubmissions === 0">
-			<p><b>Connect your website form</b> to start receiving submissions for your project.<br>You currently do not have submissions for this form. </p>
+			<p v-if="this.formType === 'default'"><b>Connect your website form</b> to start receiving submissions.<br>You currently do not have submissions for this form. </p>
+			<p v-if="this.formType === 'builder' || this.formType === 'ai'">
+                <b>Build and share your website form</b> to start receiving submissions.<br>You currently do not have submissions for this form. 
+            </p>
 		</div>
 
     </div>
@@ -170,7 +173,6 @@ export default {
         let endpoint = '/forms/' + this.formId + '/submissions/export'
         repository.get(endpoint)
             .then(response => {
-                // console.log('Export successful:', response);
                 const blob = new Blob([response.data], { type: 'text/csv;charset=utf-8;' });
                 const link = document.createElement('a');
                 const url = window.URL.createObjectURL(blob);
@@ -197,6 +199,9 @@ export default {
     computed: {
         projectId() {
             return this.store.getCurrentProject.hashId;
+        },
+        formType() {
+            return this.store.getCurrentForm.type;
         },
         formFields() {
             let fields = [];

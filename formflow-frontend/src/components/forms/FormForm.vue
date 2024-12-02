@@ -50,23 +50,27 @@ export default {
     },
     computed: {
         currentProject() {
-            // return this.$store.getters.currentProject;
             return this.store.getCurrentProject;
         },
     },
     methods: {
+        handleColorSelected(color) {
+            console.log(color);
+            this.color = color;
+			this.$emit('color-selected', color);
+        },
         submitForm() {
             this.startLoading();
             this.error = false;
 
             repository.post("/projects/" + this.currentProject.hashId + "/forms", {
                 name: this.name,
-                color: this.color,
+                color: this.color ? this.color.id : null,
+                form_type: null,
             })
                 .then(response => {
-                    console.log(response);
                     useEventBus().emit('reloadForms');
-                    this.$router.replace("/");
+                    this.$router.replace("/forms/" + response.data.form.hashId + "/options");
                 })
                 .catch(error => {
                     let message = error.response.data.message;
@@ -84,7 +88,13 @@ export default {
 }
 </script>
 
-<style scoped>
+<style scoped lang="scss">
+.form-group {
+    .form-control {
+        height: 50px;
+        margin-bottom: 10px;
+    }
+}
 h4 {
     font-size: 1.5rem;
     font-weight: 600;

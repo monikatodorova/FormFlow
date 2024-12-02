@@ -12,6 +12,7 @@ use App\Repositories\NotificationsRepository;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
+use Illuminate\Support\Facades\Http;
 
 class FormsService {
 
@@ -44,9 +45,12 @@ class FormsService {
             ], 400);
         }
 
-        $color = ColorsRepository::getColor($details['color_id'] ?? null);
+        $fields = isset($details['fields']) ? json_encode($details['fields']) : null;
+        $color = ColorsRepository::getColor($details['color'] ?? null);
         $form = FormsRepository::createForm($project, $color, [
             'name' => $details['name'],
+            'form_type' => $details['form_type'],
+            'fields' => $fields,
         ]);
 
         Recipient::create([
@@ -72,6 +76,15 @@ class FormsService {
     }
 
     /**
+     * Provides the details for the current form.
+     * @param Form $form
+     * @return \Illuminate\Database\Eloquent\Builder|\Illuminate\Database\Eloquent\Model|object
+     */
+    public static function preview(Form $form) {
+        return FormsRepository::preview($form);
+    }
+
+    /**
      * Updates the provided attributes for the form.
      * @param Form $form
      * @param array $details
@@ -79,6 +92,8 @@ class FormsService {
      */
     public static function updateForm(Form $form, array $details) {
         if(isset($details['name'])) FormsRepository::updateAttribute($form, 'name', $details['name']);
+        if(isset($details['form_type'])) FormsRepository::updateAttribute($form, 'form_type', $details['form_type']);
+        if(isset($details['fields'])) FormsRepository::updateAttribute($form, 'fields', $details['fields']);
         if(isset($details['color_id'])) FormsRepository::updateAttribute($form, 'color_id', ColorsRepository::getColor($details['color_id'])->getId());
 
         return new Response([
@@ -107,6 +122,7 @@ class FormsService {
     private static function validateRequiredFields($details) {
         $validator = Validator::make($details, [
             'name' => 'required',
+            'fields' => 'array'
         ]);
         if($validator->fails()) throw new ValidationException($validator, "Missing required fields.", $validator->errors());
         return true;
@@ -121,6 +137,78 @@ class FormsService {
         foreach($submission->form->recipients as $recipient) {
             NotificationsRepository::notifyFormRecipientForSubmission($recipient, $submission);
         }
+    }
+
+    public static function generateForm(string $description, Project $project, Form $form)
+    {
+        $prompt = "Generate a JSON array of fields for a form based on the following description:\n";
+        $prompt .= $description . "\n";
+        $prompt .= "For each field, include the following keys:\n";
+        $prompt .= "- 'label': A string representing the label of the field\n";
+        $prompt .= "- 'type': One of the following values: 'input', 'textarea', 'datepicker', 'dropdown', 'singleselect', 'multiselect', 'checkbox'\n";
+        $prompt .= "- 'name': A string representing the name or identifier of the field\n";
+        $prompt .= "- 'placeholder': A value initially displayed in te field\n";
+        $prompt .= "Respond with only a JSON array of fields, nothing else.\n";
+
+        $response = Http::withHeaders([
+            'Authorization' => 'Bearer ' . env('OPENAI_API_KEY'),
+        ])->post('https://api.openai.com/v1/chat/completions', [
+            'model' => 'gpt-4',
+            'messages' => [
+                ['role' => 'system', 'content' => 'You are a form generator.'],
+                ['role' => 'user', 'content' => $prompt],
+            ],
+        ]);
+        $generatedForm = $response->json('choices.0.message.content');
+        $formFields = json_decode($generatedForm, true);
+
+        $formFields[] = [
+            "label" => "Submit",
+            "type" => "submit",
+            "name" => "submit",
+            "placeholder" => "Submit",
+        ];
+
+        $fieldsValue = self::generateFieldsValue($formFields);
+        $output = ["rows" => $fieldsValue];
+
+        if ($output) {
+            FormsRepository::updateAttribute($form, 'fields', $output);
+            FormsRepository::updateAttribute($form, 'prompt_message', $description);
+        }
+
+        return json_encode($output, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+    }
+
+    private static function generateFieldsValue(array $formFields)
+    {
+        $fieldsTemplate = require $_SERVER['DOCUMENT_ROOT'] . '/../config/fieldsTemplate.php';
+
+        $rows = [];
+
+        foreach ($formFields as $field) {
+            $template = $fieldsTemplate[$field['type']] ?? [];
+            $rows[] = [
+                "columns" => [
+                    [
+                        "width" => "col-12",
+                        "fields" => [
+                            array_merge($template, [
+                                "type" => $field["type"],
+                                "title" => $field["label"],
+                                "name" => $field["name"],
+                                "id" => "{$field['name']}-field",
+                                "placeholder" => $field["placeholder"],
+                                "label" => $field["label"],
+                                "value" => "",
+                            ]),
+                        ],
+                    ],
+                ],
+            ];
+        }
+
+        return $rows;
     }
 
 

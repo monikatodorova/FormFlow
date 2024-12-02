@@ -4,7 +4,7 @@
     <!-- Body -->
     <div :class="{'page-global-wrapper': true, 'signed-out': !signedIn}">
 
-      <div class="page-global-sidebar">
+      <div v-if="!previewForm" class="page-global-sidebar">
         <!-- Navidation -->
         <Navigation v-if="signedIn"></Navigation>
       </div>
@@ -23,13 +23,16 @@
 
 <script>
 import { useMainStore } from '@/store';
+import { useRoute } from "vue-router";
 import Navigation from "@/components/navigation/Navigation.vue"
 
 export default {
   components: {Navigation},
   setup() {
     const store = useMainStore();
-    return { store }
+    const route = useRoute();
+
+    return { store, route }
   },
   data: function() {
     return {
@@ -39,7 +42,10 @@ export default {
   computed: {
     signedIn() {
       return this.store.getToken !== null;
-    }
+    },
+    previewForm() {
+      return this.route.meta.previewForm || false;
+    },
   },
 }
 </script>

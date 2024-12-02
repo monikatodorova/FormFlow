@@ -58,6 +58,7 @@ class UsersService {
                 ],
             ],
             'color_id' => 32,
+            'form_type' => 'default'
         ], true);
 
         // Create Default Form
@@ -70,6 +71,7 @@ class UsersService {
                 ],
             ],
             'color_id' => 26,
+            'form_type' => 'default'
         ]);
 
         // Create demo submissions

@@ -49,7 +49,7 @@ export default {
         saveColorChoice(color) {
 			console.log(color);
             this.current = color;
-			this.$emit('color-selected', this.current.id);
+			this.$emit('color-selected', this.current);
         },
         shuffle(a) {
             let j, x, i;

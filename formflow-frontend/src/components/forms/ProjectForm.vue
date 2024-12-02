@@ -67,10 +67,16 @@ export default {
 }
 </script>
 
-<style>
+<style lang="scss">
 h4 {
     font-size: 1.5rem;
     font-weight: 600;
     margin: 10px 0;
+}
+.form-group {
+    .form-control {
+        height: 50px;
+        margin-bottom: 10px;
+    }
 }
 </style>
